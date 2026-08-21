@@ -1,0 +1,535 @@
+﻿const fs = require('fs');
+
+const ownerPortalHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Owner Portal | Nexorian</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    .portal-nav-tab { padding: 10px 18px; font-weight: 600; font-size: 0.875rem; color: #64748B; background: transparent; border: none; border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.2s; }
+    .portal-nav-tab.active { color: #2563EB; border-bottom-color: #2563EB; }
+    .portal-section { display: none; }
+    .portal-section.active { display: block; }
+    .signal-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #F1F5F9; font-size: 0.8125rem; }
+    .score-badge { display: inline-block; padding: 3px 12px; border-radius: 9999px; font-weight: 700; font-size: 0.75rem; }
+    .score-high { background: #DCFCE7; color: #166534; }
+    .score-mid { background: #FEF9C3; color: #854D0E; }
+  </style>
+</head>
+<body style="background: #F8FAFC; color: #0F172A; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0;">
+  <!-- Top Navigation Header -->
+  <header style="background: #FFFFFF; border-bottom: 1px solid #E2E8F0; padding: 14px 28px; display: flex; justify-content: space-between; align-items: center;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <a href="/" style="text-decoration: none; font-weight: 800; font-size: 1.25rem; color: #0B132B;">Nexorian</a>
+      <span class="badge-active-status" style="font-size: 0.75rem; font-weight: 700; background: #EFF6FF; color: #1D4ED8;">👑 OWNER PORTAL</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <span id="user-display-name" style="font-size: 0.875rem; font-weight: 600; color: #334155;">Founder</span>
+      <button id="btn-logout" class="btn btn-sm btn-secondary">Sign Out</button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main style="max-width: 1140px; margin: 28px auto; padding: 0 20px;">
+    <!-- Organization Overview Card -->
+    <div style="background: #FFFFFF; border-radius: 12px; border: 1px solid #E2E8F0; padding: 24px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+      <div>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+          <h1 id="org-title" style="font-size: 1.5rem; font-weight: 800; margin: 0;">Organization Name</h1>
+          <div id="verified-badge-slot"></div>
+        </div>
+        <p id="org-subtitle" style="font-size: 0.875rem; color: #64748B; margin: 0;">company@domain.com · slug</p>
+      </div>
+
+      <div style="display: flex; gap: 8px;">
+        <button id="btn-open-invite-modal" class="btn btn-primary btn-sm">+ Invite Worker / Client</button>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div style="display: flex; gap: 8px; border-bottom: 1px solid #E2E8F0; margin-bottom: 24px;">
+      <button class="portal-nav-tab active" data-target="section-verification">🛡️ Domain & Trust Verification</button>
+      <button class="portal-nav-tab" data-target="section-team">👥 Team & Invites</button>
+      <button class="portal-nav-tab" data-target="section-settings">⚙️ Organization Settings</button>
+      <button class="portal-nav-tab" data-target="section-audit">📋 Tenant Audit Trail</button>
+    </div>
+
+    <!-- TAB 1: DOMAIN & TRUST AUTO-VERIFICATION -->
+    <div id="section-verification" class="portal-section active">
+      <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px;">
+        <!-- Left: Submission Form -->
+        <div style="background: #FFFFFF; border-radius: 12px; border: 1px solid #E2E8F0; padding: 24px;">
+          <h2 style="font-size: 1.125rem; font-weight: 700; margin: 0 0 8px;">Company Domain & Badge Verification</h2>
+          <p style="font-size: 0.8125rem; color: #64748B; margin: 0 0 20px; line-height: 1.5;">
+            Submit your corporate domain and official email. The backend automatically evaluates trust signals. High-confidence domains (&ge; 80%) receive the <strong>Verified Trust Badge</strong> instantly without routing to staff.
+          </p>
+
+          <form id="form-domain-verify" style="margin-bottom: 20px;">
+            <div style="margin-bottom: 14px;">
+              <label style="display: block; font-size: 0.75rem; font-weight: 600; margin-bottom: 4px;">Official Company Email</label>
+              <input type="email" id="verify-input-email" class="form-input" placeholder="admin@yourcompany.com" required style="height: 38px;">
+            </div>
+            <div style="margin-bottom: 16px;">
+              <label style="display: block; font-size: 0.75rem; font-weight: 600; margin-bottom: 4px;">Company Web Domain</label>
+              <input type="text" id="verify-input-domain" class="form-input" placeholder="yourcompany.com" required style="height: 38px;">
+            </div>
+            <button type="submit" id="btn-submit-verify" class="btn btn-primary btn-sm" style="height: 40px; font-weight: 600;">
+              ⚡ Run Instant Auto-Verification
+            </button>
+          </form>
+
+          <div id="verify-alert-box" style="display: none; padding: 12px; border-radius: 8px; font-size: 0.8125rem; font-weight: 600;"></div>
+        </div>
+
+        <!-- Right: Real-Time Signal Score Breakdown -->
+        <div style="background: #FFFFFF; border-radius: 12px; border: 1px solid #E2E8F0; padding: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h3 style="font-size: 0.9375rem; font-weight: 700; margin: 0;">Verification Signals</h3>
+            <span id="score-display-pill" class="score-badge score-high">100% Score</span>
+          </div>
+
+          <div id="signals-list-box" style="font-size: 0.8125rem;">
+            <div class="signal-item">
+              <span>✅ Corporate Domain Verified</span>
+              <span style="font-weight: 700; color: #16A34A;">+45</span>
+            </div>
+            <div class="signal-item">
+              <span>✅ Creator Email Domain Match</span>
+              <span style="font-weight: 700; color: #16A34A;">+35</span>
+            </div>
+            <div class="signal-item">
+              <span>✅ Company Profile Completeness</span>
+              <span style="font-weight: 700; color: #16A34A;">+20</span>
+            </div>
+          </div>
+
+          <div style="margin-top: 16px; padding: 12px; background: #F8FAFC; border-radius: 8px; font-size: 0.75rem; color: #64748B; line-height: 1.4;">
+            <strong>Trust Badge Policy:</strong> High-confidence organizations earn the Verified Trust Badge automatically. Startups with generic domains preserve active workspace access while badge verification is queued.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: TEAM MEMBERS & WORKER INVITES -->
+    <div id="section-team" class="portal-section">
+      <div style="background: #FFFFFF; border-radius: 12px; border: 1px solid #E2E8F0; padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div>
+            <h2 style="font-size: 1.125rem; font-weight: 700; margin: 0 0 4px;">Organization Members</h2>
+            <p style="font-size: 0.8125rem; color: #64748B; margin: 0;">Manage workers and issue single-use invitation tokens.</p>
+          </div>
+          <button id="btn-open-invite-tab" class="btn btn-primary btn-sm">+ Issue Invite Token</button>
+        </div>
+
+        <div id="members-list-container" style="font-size: 0.875rem; color: #64748B;">Loading members...</div>
+      </div>
+    </div>
+
+    <!-- TAB 3: ORGANIZATION SETTINGS -->
+    <div id="section-settings" class="portal-section">
+      <div style="background: #FFFFFF; border-radius: 12px; border: 1px solid #E2E8F0; padding: 24px;">
+        <h2 style="font-size: 1.125rem; font-weight: 700; margin: 0 0 4px;">Organization Settings</h2>
+        <p style="font-size: 0.8125rem; color: #64748B; margin: 0 0 20px;">Tenant-level metadata and isolation configuration.</p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div style="padding: 12px; background: #F8FAFC; border-radius: 8px; border: 1px solid #E2E8F0;">
+            <div style="font-size: 0.75rem; color: #64748B; font-weight: 600;">Organization ID</div>
+            <div id="settings-org-id" style="font-size: 0.8125rem; font-family: monospace; color: #0F172A; font-weight: 600; margin-top: 4px;">--</div>
+          </div>
+          <div style="padding: 12px; background: #F8FAFC; border-radius: 8px; border: 1px solid #E2E8F0;">
+            <div style="font-size: 0.75rem; color: #64748B; font-weight: 600;">Organization Slug</div>
+            <div id="settings-org-slug" style="font-size: 0.8125rem; font-family: monospace; color: #0F172A; font-weight: 600; margin-top: 4px;">--</div>
+          </div>
+          <div style="padding: 12px; background: #F8FAFC; border-radius: 8px; border: 1px solid #E2E8F0;">
+            <div style="font-size: 0.75rem; color: #64748B; font-weight: 600;">Status & Isolation</div>
+            <div id="settings-org-status" style="font-size: 0.8125rem; color: #166534; font-weight: 700; margin-top: 4px;">ACTIVE · STRICT TENANT ISOLATION</div>
+          </div>
+          <div style="padding: 12px; background: #F8FAFC; border-radius: 8px; border: 1px solid #E2E8F0;">
+            <div style="font-size: 0.75rem; color: #64748B; font-weight: 600;">Owner Role</div>
+            <div style="font-size: 0.8125rem; color: #1D4ED8; font-weight: 700; margin-top: 4px;">FOUNDER (Full Organization Authority)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: TENANT AUDIT TRAIL -->
+    <div id="section-audit" class="portal-section">
+      <div style="background: #FFFFFF; border-radius: 12px; border: 1px solid #E2E8F0; padding: 24px;">
+        <h2 style="font-size: 1.125rem; font-weight: 700; margin: 0 0 4px;">Tenant Audit Trail</h2>
+        <p style="font-size: 0.8125rem; color: #64748B; margin: 0 0 16px;">Chronological immutable record of sensitive events within your organization.</p>
+        <div id="audit-log-container" style="font-size: 0.8125rem; color: #64748B; max-height: 480px; overflow-y: auto;">Loading audit events...</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Unauthenticated Prompt Modal -->
+  <div id="auth-required-modal" style="display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.8); z-index: 2000; align-items: center; justify-content: center; padding: 16px;">
+    <div style="background: #FFFFFF; border-radius: 12px; max-width: 440px; width: 100%; padding: 32px 24px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);">
+      <div style="font-size: 2.25rem; margin-bottom: 12px;">👑</div>
+      <h2 style="font-size: 1.25rem; font-weight: 800; color: #0F172A; margin: 0 0 8px;">Owner Authentication Required</h2>
+      <p style="font-size: 0.875rem; color: #64748B; margin: 0 0 20px;">You are not signed in. Access the Owner Portal with test credentials or go to sign-in:</p>
+      
+      <button id="btn-quick-founder-login" class="btn btn-primary btn-full" style="height: 40px; font-weight: 600; margin-bottom: 12px;">
+        👑 Sign In as Founder / Owner (1-Click)
+      </button>
+      <a href="/sign-in" style="font-size: 0.8125rem; color: #2563EB; text-decoration: none;">Go to Sign In Page</a>
+    </div>
+  </div>
+
+  <!-- Single-Use Invite Modal -->
+  <div id="invite-modal" style="display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.6); z-index: 1000; align-items: center; justify-content: center; padding: 16px;">
+    <div style="background: #FFFFFF; border-radius: 12px; max-width: 440px; width: 100%; padding: 24px;">
+      <h3 style="font-size: 1.125rem; font-weight: 700; margin: 0 0 16px;">Create Single-Use Invitation</h3>
+      <div id="invite-form-box">
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-size: 0.75rem; font-weight: 600; margin-bottom: 4px;">Recipient Email</label>
+          <input type="email" id="invite-email" class="form-input" placeholder="worker@company.com" style="height: 38px;">
+        </div>
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-size: 0.75rem; font-weight: 600; margin-bottom: 4px;">Role</label>
+          <select id="invite-role" class="form-input" style="height: 38px;">
+            <option value="MEMBER">Member (Worker)</option>
+            <option value="ADMIN">Admin</option>
+            <option value="CLIENT">Client Partner</option>
+          </select>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 8px;">
+          <button id="btn-close-invite" class="btn btn-sm btn-secondary">Cancel</button>
+          <button id="btn-send-invite" class="btn btn-sm btn-primary">Generate Secure Token</button>
+        </div>
+      </div>
+      <div id="invite-result-box" style="display: none; margin-top: 12px;">
+        <p style="font-size: 0.8125rem; color: #16A34A; font-weight: 600;">Single-use invitation token generated!</p>
+        <input type="text" id="invite-link-display" readonly class="form-input" style="height: 36px; font-family: monospace; font-size: 0.75rem; margin-bottom: 8px;">
+        <button id="btn-done-invite" class="btn btn-sm btn-primary btn-full">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+      let sessionToken = sessionStorage.getItem('nexorian_session_token');
+      let user = null;
+      let activeOrg = null;
+
+      // Quick Founder Login Helper
+      const quickBtn = document.getElementById('btn-quick-founder-login');
+      if (quickBtn) {
+        quickBtn.addEventListener('click', async function() {
+          try {
+            const res = await fetch('/api/auth/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: 'founder@nexorian.demo', password: 'FounderPassword123!' }),
+            });
+            const data = await res.json();
+            if (res.ok && data.sessionToken) {
+              sessionStorage.setItem('nexorian_session_token', data.sessionToken);
+              sessionStorage.setItem('nexorian_user', JSON.stringify(data.user));
+              if (data.activeOrganization) {
+                sessionStorage.setItem('nexorian_active_org', JSON.stringify(data.activeOrganization));
+              }
+              window.location.reload();
+            } else {
+              alert('Login failed: ' + (data.error || 'Unknown error'));
+            }
+          } catch(e) {
+            alert('Network error');
+          }
+        });
+      }
+
+      // Check Session with Backend
+      if (sessionToken) {
+        try {
+          const res = await fetch('/api/auth/me', {
+            headers: { 'Authorization': 'Bearer ' + sessionToken },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            user = data.user;
+            if (data.memberships && data.memberships.length > 0) {
+              activeOrg = data.memberships[0].organization;
+              sessionStorage.setItem('nexorian_active_org', JSON.stringify(activeOrg));
+            }
+          } else {
+            sessionToken = null;
+          }
+        } catch(e) {
+          sessionToken = null;
+        }
+      }
+
+      if (!sessionToken || !user) {
+        document.getElementById('auth-required-modal').style.display = 'flex';
+        return;
+      }
+
+      // Render User Details
+      document.getElementById('user-display-name').textContent = user.name + ' (' + user.email + ')';
+
+      // Render Organization Overview
+      function renderOrgDetails() {
+        if (!activeOrg) return;
+        document.getElementById('org-title').textContent = activeOrg.name;
+        document.getElementById('org-subtitle').textContent = (activeOrg.domain || activeOrg.companyEmail) + ' · slug: ' + activeOrg.slug;
+
+        const badgeSlot = document.getElementById('verified-badge-slot');
+        if (activeOrg.isVerified) {
+          badgeSlot.innerHTML = '<span style="background:#DCFCE7; color:#166534; font-size:0.75rem; font-weight:700; padding:4px 10px; border-radius:9999px;">🛡️ Verified Trust Badge</span>';
+        } else {
+          badgeSlot.innerHTML = '<span style="background:#EFF6FF; color:#1D4ED8; font-size:0.75rem; font-weight:600; padding:4px 10px; border-radius:9999px;">Standard Active (Unverified)</span>';
+        }
+
+        // Settings view fields
+        document.getElementById('settings-org-id').textContent = activeOrg.id;
+        document.getElementById('settings-org-slug').textContent = activeOrg.slug;
+
+        // Auto-fill verification form fields if empty
+        const emailInput = document.getElementById('verify-input-email');
+        const domainInput = document.getElementById('verify-input-domain');
+        if (!emailInput.value) emailInput.value = activeOrg.companyEmail || '';
+        if (!domainInput.value) domainInput.value = activeOrg.domain || '';
+      }
+      renderOrgDetails();
+
+      // Tab Navigation
+      document.querySelectorAll('.portal-nav-tab').forEach(function(tab) {
+        tab.addEventListener('click', function() {
+          document.querySelectorAll('.portal-nav-tab').forEach(function(t) { t.classList.remove('active'); });
+          document.querySelectorAll('.portal-section').forEach(function(s) { s.classList.remove('active'); });
+          tab.classList.add('active');
+          const targetId = tab.getAttribute('data-target');
+          const targetSection = document.getElementById(targetId);
+          if (targetSection) targetSection.classList.add('active');
+        });
+      });
+
+      // Sign Out Handler
+      document.getElementById('btn-logout').addEventListener('click', async function() {
+        if (sessionToken) {
+          await fetch('/api/auth/logout', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + sessionToken },
+          }).catch(function(){});
+        }
+        sessionStorage.clear();
+        window.location.href = '/sign-in';
+      });
+
+      // ----------------------------------------------------------------------
+      // AUTO-VERIFICATION SUBMISSION
+      // ----------------------------------------------------------------------
+      const verifyForm = document.getElementById('form-domain-verify');
+      const verifyBtn = document.getElementById('btn-submit-verify');
+      const verifyAlert = document.getElementById('verify-alert-box');
+
+      verifyForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const companyEmail = document.getElementById('verify-input-email').value.trim();
+        const domain = document.getElementById('verify-input-domain').value.trim();
+
+        verifyBtn.disabled = true;
+        verifyBtn.textContent = 'Evaluating Trust Signals...';
+
+        try {
+          const res = await fetch('/api/organizations/' + activeOrg.id + '/verify-domain', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + sessionToken,
+              'x-tenant-id': activeOrg.id,
+            },
+            body: JSON.stringify({ companyEmail: companyEmail, domain: domain }),
+          });
+
+          const data = await res.json();
+          verifyAlert.style.display = 'block';
+
+          if (res.ok && data.success) {
+            activeOrg = data.organization;
+            sessionStorage.setItem('nexorian_active_org', JSON.stringify(activeOrg));
+            renderOrgDetails();
+
+            if (data.isVerified) {
+              verifyAlert.style.background = '#DCFCE7';
+              verifyAlert.style.color = '#166534';
+              verifyAlert.innerHTML = '🛡️ <strong>Auto-Approved!</strong> Verified Trust Badge awarded immediately (Score: ' + data.confidenceScore + '%). No manual staff review required.';
+            } else {
+              verifyAlert.style.background = '#FEF9C3';
+              verifyAlert.style.color = '#854D0E';
+              verifyAlert.innerHTML = '⏳ <strong>Submitted for Verification.</strong> Confidence score: ' + data.confidenceScore + '%. Workspace remains active while badge qualification is reviewed.';
+            }
+
+            if (data.signals && data.signals.length > 0) {
+              let sigHtml = '';
+              data.signals.forEach(function(s) {
+                const icon = s.passed ? '✅' : '❌';
+                const color = s.passed ? '#16A34A' : '#DC2626';
+                sigHtml += '<div class="signal-item"><span>' + icon + ' ' + s.signal + '</span><span style="font-weight:700; color:' + color + '">+' + s.weight + '</span></div>';
+              });
+              document.getElementById('signals-list-box').innerHTML = sigHtml;
+              document.getElementById('score-display-pill').textContent = data.confidenceScore + '% Score';
+              document.getElementById('score-display-pill').className = 'score-badge ' + (data.confidenceScore >= 80 ? 'score-high' : 'score-mid');
+            }
+          } else {
+            verifyAlert.style.background = '#FEE2E2';
+            verifyAlert.style.color = '#991B1B';
+            verifyAlert.textContent = data.error || 'Verification submission failed.';
+          }
+        } catch(err) {
+          verifyAlert.style.display = 'block';
+          verifyAlert.style.background = '#FEE2E2';
+          verifyAlert.style.color = '#991B1B';
+          verifyAlert.textContent = 'Network error during verification evaluation.';
+        } finally {
+          verifyBtn.disabled = false;
+          verifyBtn.textContent = '⚡ Run Instant Auto-Verification';
+        }
+      });
+
+      // ----------------------------------------------------------------------
+      // MEMBERS LIST & ROLE CONTROLS
+      // ----------------------------------------------------------------------
+      async function loadMembers() {
+        if (!activeOrg) return;
+        const container = document.getElementById('members-list-container');
+        try {
+          const res = await fetch('/api/organizations/' + activeOrg.id + '/members', {
+            headers: { 'Authorization': 'Bearer ' + sessionToken, 'x-tenant-id': activeOrg.id },
+          });
+          const members = await res.json();
+          container.innerHTML = '';
+
+          members.forEach(function(m) {
+            const row = document.createElement('div');
+            row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #F1F5F9;';
+            
+            let roleControl = '<span class="badge-active-status" style="font-size:0.75rem;">' + m.role + '</span>';
+            if (m.user.id !== user.id) {
+              roleControl = '<select class="role-selector form-input" data-id="' + m.id + '" style="height:30px; font-size:0.75rem; width:110px;">' +
+                '<option value="MEMBER"' + (m.role === 'MEMBER' ? ' selected' : '') + '>MEMBER</option>' +
+                '<option value="ADMIN"' + (m.role === 'ADMIN' ? ' selected' : '') + '>ADMIN</option>' +
+                '<option value="CLIENT"' + (m.role === 'CLIENT' ? ' selected' : '') + '>CLIENT</option>' +
+                '<option value="ORG_OWNER"' + (m.role === 'ORG_OWNER' ? ' selected' : '') + '>ORG_OWNER</option>' +
+              '</select>';
+            }
+
+            row.innerHTML = '<div><strong>' + m.user.name + '</strong><br><span style="color:#64748B; font-size:0.75rem;">' + m.user.email + '</span></div>' +
+              '<div>' + roleControl + '</div>';
+            container.appendChild(row);
+          });
+        } catch(e) {
+          container.innerHTML = '<span style="color:#DC2626;">Failed to load members.</span>';
+        }
+      }
+      loadMembers();
+
+      // Role change handler
+      document.getElementById('members-list-container').addEventListener('change', async function(e) {
+        if (!e.target.classList.contains('role-selector')) return;
+        const memberId = e.target.getAttribute('data-id');
+        const newRole = e.target.value;
+
+        try {
+          const res = await fetch('/api/organizations/' + activeOrg.id + '/members/' + memberId + '/role', {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + sessionToken,
+              'x-tenant-id': activeOrg.id,
+            },
+            body: JSON.stringify({ role: newRole }),
+          });
+          if (!res.ok) {
+            alert('Failed to update role.');
+            loadMembers();
+          }
+        } catch(err) {
+          alert('Network error updating role.');
+          loadMembers();
+        }
+      });
+
+      // ----------------------------------------------------------------------
+      // INVITE MODAL HANDLING
+      // ----------------------------------------------------------------------
+      const inviteModal = document.getElementById('invite-modal');
+      function openInvite() {
+        document.getElementById('invite-form-box').style.display = 'block';
+        document.getElementById('invite-result-box').style.display = 'none';
+        document.getElementById('invite-email').value = '';
+        inviteModal.style.display = 'flex';
+      }
+
+      document.getElementById('btn-open-invite-modal').addEventListener('click', openInvite);
+      document.getElementById('btn-open-invite-tab').addEventListener('click', openInvite);
+      document.getElementById('btn-close-invite').addEventListener('click', function() { inviteModal.style.display = 'none'; });
+      document.getElementById('btn-done-invite').addEventListener('click', function() { inviteModal.style.display = 'none'; });
+
+      document.getElementById('btn-send-invite').addEventListener('click', async function() {
+        const email = document.getElementById('invite-email').value.trim();
+        const role = document.getElementById('invite-role').value;
+        if (!email) return alert('Recipient email is required.');
+
+        try {
+          const res = await fetch('/api/invites', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + sessionToken,
+              'x-tenant-id': activeOrg.id,
+            },
+            body: JSON.stringify({ email: email, role: role }),
+          });
+          const data = await res.json();
+          if (res.ok) {
+            document.getElementById('invite-form-box').style.display = 'none';
+            document.getElementById('invite-result-box').style.display = 'block';
+            document.getElementById('invite-link-display').value = window.location.origin + '/accept-invite?token=' + data.token;
+          } else {
+            alert(data.error || 'Failed to issue invite.');
+          }
+        } catch(err) {
+          alert('Network error creating invite.');
+        }
+      });
+
+      // ----------------------------------------------------------------------
+      // AUDIT TRAIL LOGS
+      // ----------------------------------------------------------------------
+      async function loadAuditLogs() {
+        if (!activeOrg) return;
+        const container = document.getElementById('audit-log-container');
+        try {
+          const res = await fetch('/api/audit-logs', {
+            headers: { 'Authorization': 'Bearer ' + sessionToken, 'x-tenant-id': activeOrg.id },
+          });
+          const logs = await res.json();
+          container.innerHTML = '';
+
+          if (!logs || logs.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:20px; color:#94A3B8;">No audit events recorded yet.</div>';
+          } else {
+            logs.forEach(function(log) {
+              const item = document.createElement('div');
+              item.style.cssText = 'padding:10px 0; border-bottom:1px solid #F1F5F9;';
+              item.innerHTML = '<div style="display:flex; justify-content:space-between;"><strong style="color:#0F172A;">' + log.action + '</strong><span style="color:#94A3B8; font-size:0.6875rem;">' + new Date(log.timestamp).toLocaleTimeString() + '</span></div><div style="color:#64748B; font-size:0.75rem;">Actor: ' + (log.actorEmail || 'System') + ' · Target: ' + log.targetType + '</div>';
+              container.appendChild(item);
+            });
+          }
+        } catch(e) {
+          container.innerHTML = '<span style="color:#DC2626;">Failed to load audit logs.</span>';
+        }
+      }
+      loadAuditLogs();
+    });
+  </script>
+</body>
+</html>`;
+
+fs.writeFileSync('c:/nexorian/owner-portal.html', ownerPortalHtml, 'utf8');
+console.log('owner-portal.html generated successfully');

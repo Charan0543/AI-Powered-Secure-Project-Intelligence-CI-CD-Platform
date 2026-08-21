@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Status & Access Notices | Nexorian</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="onboarding-body">
+  <header class="site-header">
+    <div class="header-container">
+      <a href="/" class="brand-link"><span class="brand-name" style="font-size:1.25rem; font-weight:800; color:#0B132B;">Nexorian</span></a>
+      <nav class="header-nav">
+        <div class="nav-actions">
+          <a href="/sign-in" class="btn btn-secondary nav-btn-subtle">Sign In</a>
+          <a href="/join-organization" class="btn btn-secondary nav-btn-subtle">Join Organization</a>
+          <a href="/create-organization" class="btn btn-primary nav-btn-primary">Create Organization</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main style="padding: 40px 16px; min-height: 75vh; display: flex; justify-content: center; align-items: center;">
+    <div style="max-width: 500px; width: 100%; background: #fff; border-radius: 12px; border: 1px solid #E2E8F0; padding: 32px 28px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+      <div id="status-icon" style="font-size: 2.5rem; margin-bottom: 12px;">???</div>
+      <h1 id="status-title" style="font-size: 1.375rem; font-weight: 800; color: #0F172A; margin: 0 0 8px;">Organization Status</h1>
+      <p id="status-desc" style="font-size: 0.875rem; color: #64748B; margin-bottom: 24px; line-height: 1.5;">Loading status details...</p>
+      
+      <div id="status-action-box">
+        <a href="/" class="btn btn-secondary" style="margin-right: 8px;">Return Home</a>
+        <a href="/sign-in" class="btn btn-primary">Sign In</a>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code') || 'access_denied';
+      const titleEl = document.getElementById('status-title');
+      const descEl = document.getElementById('status-desc');
+      const iconEl = document.getElementById('status-icon');
+
+      switch (code) {
+        case 'pending_verification':
+          iconEl.textContent = '?';
+          titleEl.textContent = 'Verification in Progress';
+          descEl.textContent = 'Your organization verification request has been submitted. Legitimate workspaces remain active while review is completed.';
+          break;
+        case 'under_review':
+          iconEl.textContent = '??';
+          titleEl.textContent = 'Under Staff Review';
+          descEl.textContent = 'Nexorian staff is reviewing submitted corporate credentials for trust badge qualification.';
+          break;
+        case 'suspended':
+          iconEl.textContent = '??';
+          titleEl.textContent = 'Organization Suspended';
+          descEl.textContent = 'This organization has been suspended due to security policy or trust violation. Please contact Nexorian support.';
+          break;
+        case 'access_denied':
+        default:
+          iconEl.textContent = '??';
+          titleEl.textContent = 'Access Denied';
+          descEl.textContent = 'You do not have authorization to access the requested resource or organization tenant.';
+          break;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Join Organization | Nexorian</title>
+  <meta name="description" content="Join a secure, permission-aware project intelligence workspace on Nexorian using your role-specific invitation.">
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="onboarding-body">
+
+  <!-- Accessible Skip Link -->
+  <a href="#main-join-content" class="skip-link">Skip to join form</a>
+
+  <!-- Header Navigation -->
+  <header class="onboarding-header">
+    <div class="header-container">
+      <a href="/" class="brand-link" aria-label="Nexorian Home">
+        <div class="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16 2L28 8V24L16 30L4 24V8L16 2Z" fill="#1E293B" stroke="#2563EB" stroke-width="2"/>
+            <path d="M16 8L23 12V20L16 24L9 20V12L16 8Z" fill="#2563EB" opacity="0.2"/>
+            <circle cx="16" cy="16" r="3.5" fill="#2563EB"/>
+          </svg>
+        </div>
+        <span class="brand-text">Nexorian</span>
+      </a>
+
+      <nav class="header-right-nav">
+        <a href="/" class="back-link">
+          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Back to Home</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main id="main-join-content" class="onboarding-main">
+    <div class="wizard-container">
+
+      <!-- Step Tracker -->
+      <nav class="step-tracker" aria-label="Join steps">
+        <ol class="step-list">
+          <li class="step-item is-active" id="join-tab-1">
+            <span class="step-indicator" aria-hidden="true">1</span>
+            <span class="step-label">Invitation</span>
+          </li>
+          <li class="step-item" id="join-tab-2">
+            <span class="step-indicator" aria-hidden="true">2</span>
+            <span class="step-label">Account Setup</span>
+          </li>
+          <li class="step-item" id="join-tab-3">
+            <span class="step-indicator" aria-hidden="true">3</span>
+            <span class="step-label">Verification</span>
+          </li>
+        </ol>
+      </nav>
+
+      <!-- Global Alert Banner -->
+      <div id="join-global-alert" class="form-alert" role="alert" hidden></div>
+
+      <!-- Card Surface -->
+      <div class="wizard-card">
+
+        <!-- ===================================================================
+             PANE 1: Token Lookup / Validation
+             =================================================================== -->
+        <section id="join-pane-token" class="wizard-pane">
+          <div class="pane-header">
+            <span class="pane-eyebrow">Organization Access</span>
+            <h1 class="pane-title">Join via Invitation</h1>
+            <p class="pane-subtitle">Enter your company invitation code or paste the role-specific link sent by your organization owner.</p>
+          </div>
+
+          <form id="token-lookup-form" class="wizard-form" novalidate>
+            <div class="form-group" id="group-invitationTokenInput">
+              <label for="invitation-token-input" class="form-label">
+                Invitation Token / Company Code <span class="required-indicator" aria-hidden="true">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="invitation-token-input" 
+                class="form-input input-mono" 
+                placeholder="e.g. 48-character invite token" 
+                required 
+                autocomplete="off"
+                spellcheck="false"
+              >
+              <span class="field-hint">Check your email for the role-specific invitation link or token code.</span>
+              <span class="field-error-msg" id="error-invitationTokenInput" aria-live="polite"></span>
+            </div>
+
+            <div class="wizard-footer">
+              <button type="submit" class="btn btn-primary" id="validate-token-btn">
+                <span class="btn-text">Validate Invitation</span>
+                <span class="btn-spinner" aria-hidden="true" hidden></span>
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <!-- ===================================================================
+             PANE 2: Account Details & Joining
+             =================================================================== -->
+        <section id="join-pane-form" class="wizard-pane" hidden>
+          <div class="pane-header">
+            <span class="pane-eyebrow">Invitation Verified</span>
+            <h1 class="pane-title" id="join-org-title">Join Organization</h1>
+            <p class="pane-subtitle">Complete your personal account credentials to submit your membership request.</p>
+          </div>
+
+          <!-- Invitation Scope Summary Banner -->
+          <div class="role-notice-card" id="invitation-summary-badge">
+            <div class="invitation-scope-info">
+              <span class="role-notice-label">Invited to Workspace</span>
+              <h2 class="invited-org-name" id="display-org-name">—</h2>
+              <div class="role-pill-row">
+                <span class="summary-label">Predefined Role:</span>
+                <span class="role-badge-owner" id="display-invited-role">CEO</span>
+                <span class="field-meta-tag">Assigned by Owner</span>
+              </div>
+            </div>
+          </div>
+
+          <form id="join-account-form" class="wizard-form" style="margin-top: 24px;" novalidate>
+            <!-- Hidden Token -->
+            <input type="hidden" id="join-token-hidden" name="invitationToken">
+
+            <!-- Full Name -->
+            <div class="form-group" id="group-name">
+              <label for="join-name" class="form-label">
+                Full Name <span class="required-indicator" aria-hidden="true">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="join-name" 
+                name="name" 
+                class="form-input" 
+                placeholder="e.g. Marcus Vance" 
+                required 
+                autocomplete="name"
+                maxlength="100"
+              >
+              <span class="field-error-msg" id="error-name" aria-live="polite"></span>
+            </div>
+
+            <!-- Email Address -->
+            <div class="form-group" id="group-email">
+              <label for="join-email" class="form-label">
+                Email Address <span class="required-indicator" aria-hidden="true">*</span>
+              </label>
+              <input 
+                type="email" 
+                id="join-email" 
+                name="email" 
+                class="form-input" 
+                placeholder="marcus@company.corp" 
+                required 
+                autocomplete="email"
+                maxlength="150"
+              >
+              <span class="field-error-msg" id="error-email" aria-live="polite"></span>
+            </div>
+
+            <!-- Employee ID & Phone Row -->
+            <div class="form-row-grid">
+              <div class="form-group" id="group-employeeId">
+                <label for="join-employee-id" class="form-label">
+                  Employee ID <span class="required-indicator" aria-hidden="true">*</span>
+                </label>
+                <input 
+                  type="text" 
+                  id="join-employee-id" 
+                  name="employeeId" 
+                  class="form-input input-mono" 
+                  placeholder="e.g. EMP-2026-089" 
+                  required 
+                  autocomplete="off"
+                  maxlength="50"
+                >
+                <span class="field-error-msg" id="error-employeeId" aria-live="polite"></span>
+              </div>
+
+              <div class="form-group" id="group-phoneNumber">
+                <label for="join-phone" class="form-label">Phone Number (Optional)</label>
+                <input 
+                  type="tel" 
+                  id="join-phone" 
+                  name="phoneNumber" 
+                  class="form-input" 
+                  placeholder="+1 (555) 000-0000" 
+                  autocomplete="tel"
+                >
+              </div>
+            </div>
+
+            <!-- GitHub Profile (Optional) -->
+            <div class="form-group" id="group-githubUrl">
+              <label for="join-github" class="form-label">GitHub Profile (Optional)</label>
+              <input 
+                type="url" 
+                id="join-github" 
+                name="githubUrl" 
+                class="form-input" 
+                placeholder="https://github.com/username" 
+                autocomplete="url"
+              >
+            </div>
+
+            <!-- Password Fields -->
+            <div class="form-row-grid">
+              <!-- Password -->
+              <div class="form-group" id="group-password">
+                <label for="join-password" class="form-label">
+                  Create Password <span class="required-indicator" aria-hidden="true">*</span>
+                </label>
+                <div class="password-input-wrapper">
+                  <input 
+                    type="password" 
+                    id="join-password" 
+                    name="password" 
+                    class="form-input password-input" 
+                    placeholder="Min. 8 characters" 
+                    required 
+                    minlength="8"
+                    autocomplete="new-password"
+                  >
+                  <button type="button" class="password-toggle-btn" data-target="join-password" aria-label="Toggle password visibility">
+                    <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path d="M10 4.5C5.5 4.5 2 10 2 10C2 10 5.5 15.5 10 15.5C14.5 15.5 18 10 18 10C18 10 14.5 4.5 10 4.5Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                      <circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.6"/>
+                    </svg>
+                  </button>
+                </div>
+                <span class="field-error-msg" id="error-password" aria-live="polite"></span>
+              </div>
+
+              <!-- Confirm Password -->
+              <div class="form-group" id="group-confirmPassword">
+                <label for="join-confirm-password" class="form-label">
+                  Confirm Password <span class="required-indicator" aria-hidden="true">*</span>
+                </label>
+                <div class="password-input-wrapper">
+                  <input 
+                    type="password" 
+                    id="join-confirm-password" 
+                    name="confirmPassword" 
+                    class="form-input password-input" 
+                    placeholder="Re-enter password" 
+                    required 
+                    minlength="8"
+                    autocomplete="new-password"
+                  >
+                  <button type="button" class="password-toggle-btn" data-target="join-confirm-password" aria-label="Toggle confirm password visibility">
+                    <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path d="M10 4.5C5.5 4.5 2 10 2 10C2 10 5.5 15.5 10 15.5C14.5 15.5 18 10 18 10C18 10 14.5 4.5 10 4.5Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                      <circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.6"/>
+                    </svg>
+                  </button>
+                </div>
+                <span class="field-error-msg" id="error-confirmPassword" aria-live="polite"></span>
+              </div>
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="wizard-footer-split">
+              <button type="button" class="btn btn-secondary" id="back-to-token-btn">
+                Change Code
+              </button>
+              <button type="submit" class="btn btn-primary" id="submit-join-btn">
+                <span class="btn-text">Submit Join Request</span>
+                <span class="btn-spinner" aria-hidden="true" hidden></span>
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <!-- ===================================================================
+             PANE 3: Email OTP Verification
+             =================================================================== -->
+        <section id="join-pane-verify" class="wizard-pane" hidden>
+          <div class="pane-header text-center">
+            <span class="pane-eyebrow">Identity Security</span>
+            <h1 class="pane-title">Verify Your Email</h1>
+            <p class="pane-subtitle">
+              We sent a 6-digit verification code to <strong id="display-verify-email" class="text-primary">—</strong>.
+            </p>
+          </div>
+
+          <div class="verification-hub">
+            <div class="status-pill-pending">
+              <span class="status-pulse-amber" aria-hidden="true"></span>
+              <span>Verification Pending</span>
+            </div>
+
+            <!-- Local Development Code Helper Banner -->
+            <div id="join-dev-code-banner" class="dev-code-helper" hidden>
+              <div class="dev-code-text">
+                <span class="dev-tag">LOCAL DEV CODE</span>
+                <code id="join-dev-code-value">------</code>
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm" id="join-autofill-otp-btn">
+                Auto-fill Code
+              </button>
+            </div>
+
+            <form id="join-verify-otp-form" class="otp-form" novalidate>
+              <div class="otp-digits-wrapper" role="group" aria-label="6-digit verification code">
+                <input type="text" class="otp-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="one-time-code" required aria-label="Digit 1">
+                <input type="text" class="otp-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" required aria-label="Digit 2">
+                <input type="text" class="otp-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" required aria-label="Digit 3">
+                <input type="text" class="otp-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" required aria-label="Digit 4">
+                <input type="text" class="otp-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" required aria-label="Digit 5">
+                <input type="text" class="otp-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" required aria-label="Digit 6">
+              </div>
+              <span class="field-error-msg text-center" id="error-join-code" aria-live="polite"></span>
+
+              <div class="otp-actions">
+                <button type="submit" class="btn btn-primary" id="join-verify-otp-btn">
+                  <span class="btn-text">Verify Email & Complete Request</span>
+                  <span class="btn-spinner" aria-hidden="true" hidden></span>
+                </button>
+                <div class="resend-row">
+                  <span>Didn't receive the code?</span>
+                  <button type="button" class="resend-btn" id="join-resend-otp-btn">
+                    Resend verification code
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- ===================================================================
+             PANE 4: Pending Approval Success State
+             =================================================================== -->
+        <section id="join-pane-success" class="wizard-pane" hidden>
+          <div class="success-hub">
+            <div class="verification-icon-box" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" fill="#FEF3C7" stroke="#D97706" stroke-width="2"/>
+                <path d="M12 7V12L15 15" stroke="#B45309" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+
+            <div class="status-pill-pending">
+              <span class="status-pulse-amber" aria-hidden="true"></span>
+              <span>Awaiting Owner Approval</span>
+            </div>
+
+            <h1 class="pane-title text-center">Join request submitted successfully. Awaiting owner approval.</h1>
+            <p class="pane-subtitle text-center">
+              Your email has been verified. Your request has been queued for review by the organization owner in the Owner Portal.
+            </p>
+
+            <div class="activation-summary-card">
+              <div class="summary-item">
+                <span class="summary-label">Organization</span>
+                <span class="summary-value" id="final-join-org">—</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-label">Assigned Role</span>
+                <span class="summary-value role-badge-owner" id="final-join-role">CEO</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-label">Applicant Email</span>
+                <span class="summary-value" id="final-join-email">—</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-label">Membership Status</span>
+                <span class="summary-value" style="color: #D97706; font-weight: 700;">PENDING_APPROVAL</span>
+              </div>
+            </div>
+
+            <div class="success-actions-block">
+              <a href="/" class="btn btn-primary">
+                Return to Home
+              </a>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- JavaScript -->
+  <script src="js/join-org.js"></script>
+</body>
+</html>

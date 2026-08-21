@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accept Invitation | Nexorian</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body class="onboarding-body">
+  <header class="site-header">
+    <div class="header-container">
+      <a href="/" class="brand-link">
+        <span class="brand-name" style="font-size:1.25rem; font-weight:800; color:#0B132B;">Nexorian</span>
+      </a>
+      <nav class="header-nav">
+        <div class="nav-actions">
+          <a href="/sign-in" class="btn btn-secondary nav-btn-subtle">Sign In</a>
+          <a href="/join-organization" class="btn btn-secondary nav-btn-subtle">Join Organization</a>
+          <a href="/create-organization" class="btn btn-primary nav-btn-primary">Create Organization</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main style="padding: 40px 16px; min-height: 75vh; display: flex; justify-content: center; align-items: center;">
+    <div style="max-width: 480px; width: 100%; background: #fff; border-radius: 12px; border: 1px solid #E2E8F0; padding: 32px 28px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <span style="font-size: 0.75rem; font-weight: 700; color: #2563EB; text-transform: uppercase;">Organization Onboarding</span>
+        <h1 style="font-size: 1.375rem; font-weight: 800; color: #0F172A; margin: 6px 0;">Join Workspace</h1>
+        <p id="invite-subtitle" style="font-size: 0.875rem; color: #64748B;">Validating invitation token...</p>
+      </div>
+
+      <div id="invite-alert" class="form-alert" hidden style="margin-bottom: 16px;"></div>
+
+      <div id="invite-card" style="display: none; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+          <span style="font-size:0.75rem; color:#64748B; font-weight:600;">ORGANIZATION</span>
+          <span id="card-org-name" style="font-size:0.875rem; font-weight:700; color:#0F172A;">—</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+          <span style="font-size:0.75rem; color:#64748B; font-weight:600;">ASSIGNED ROLE</span>
+          <span id="card-org-role" class="badge-active-status" style="font-size:0.75rem; font-weight:700;">—</span>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+          <span style="font-size:0.75rem; color:#64748B; font-weight:600;">INVITED EMAIL</span>
+          <span id="card-org-email" style="font-size:0.8125rem; font-family:monospace; color:#334155;">—</span>
+        </div>
+      </div>
+
+      <div id="accept-actions" style="display: none;">
+        <button id="btn-accept-invite" class="btn btn-primary btn-full" style="height: 44px; font-weight: 600;">
+          Accept Invitation & Enter Workspace
+        </button>
+      </div>
+
+      <div id="signin-prompt" style="display: none; text-align: center; margin-top: 16px;">
+        <p style="font-size: 0.8125rem; color: #64748B; margin-bottom: 12px;">You must be signed in to accept this invitation.</p>
+        <a href="/sign-in" id="link-signin-redirect" class="btn btn-primary btn-sm">Sign In / Register</a>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+      const alertEl = document.getElementById('invite-alert');
+      const subtitleEl = document.getElementById('invite-subtitle');
+      const cardEl = document.getElementById('invite-card');
+      const actionsEl = document.getElementById('accept-actions');
+      const signinPromptEl = document.getElementById('signin-prompt');
+      const btnAccept = document.getElementById('btn-accept-invite');
+
+      function showAlert(msg, isError) {
+        alertEl.textContent = msg;
+        alertEl.className = 'form-alert ' + (isError ? '' : 'form-alert-info');
+        alertEl.hidden = false;
+      }
+
+      if (!token) {
+        subtitleEl.textContent = 'Token Missing';
+        showAlert('No invitation token found in URL. Please check your invitation email.', true);
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/invites/verify/' + encodeURIComponent(token));
+        const data = await res.json();
+
+        if (!res.ok) {
+          subtitleEl.textContent = 'Invitation Unavailable';
+          showAlert(data.error || 'This invitation is invalid, expired, or already used.', true);
+          return;
+        }
+
+        subtitleEl.textContent = 'You are invited to join ' + data.organization.name;
+        document.getElementById('card-org-name').textContent = data.organization.name;
+        document.getElementById('card-org-role').textContent = data.role;
+        document.getElementById('card-org-email').textContent = data.email;
+        cardEl.style.display = 'block';
+
+        const sessionToken = sessionStorage.getItem('nexorian_session_token');
+        if (!sessionToken) {
+          signinPromptEl.style.display = 'block';
+          document.getElementById('link-signin-redirect').href = '/sign-in?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+        } else {
+          actionsEl.style.display = 'block';
+        }
+      } catch (err) {
+        showAlert('Network error checking invitation status.', true);
+      }
+
+      btnAccept.addEventListener('click', async function() {
+        btnAccept.disabled = true;
+        btnAccept.textContent = 'Activating Membership...';
+        const sessionToken = sessionStorage.getItem('nexorian_session_token');
+
+        try {
+          const res = await fetch('/api/invites/accept', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + sessionToken,
+            },
+            body: JSON.stringify({ token: token }),
+          });
+
+          const data = await res.json();
+          if (res.ok && data.success) {
+            showAlert('Invitation accepted! Entering portal...', false);
+            sessionStorage.setItem('nexorian_role', data.role);
+            sessionStorage.setItem('nexorian_active_org', JSON.stringify(data.organization));
+            setTimeout(function() {
+              window.location.href = data.redirectUrl || '/workspace';
+            }, 600);
+          } else {
+            showAlert(data.error || 'Could not accept invitation.', true);
+            btnAccept.disabled = false;
+            btnAccept.textContent = 'Accept Invitation & Enter Workspace';
+          }
+        } catch (err) {
+          showAlert('Network error during invitation acceptance.', true);
+          btnAccept.disabled = false;
+          btnAccept.textContent = 'Accept Invitation & Enter Workspace';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

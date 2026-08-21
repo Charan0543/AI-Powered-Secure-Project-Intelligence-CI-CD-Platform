@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In | Nexorian</title>
+  <meta name="description" content="Sign in to your Nexorian workspace.">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body class="signin-body">
+  <!-- Public Minimal Header -->
+  <header class="site-header">
+    <div class="header-container">
+      <a href="/" class="brand-link">
+        <span class="brand-name" style="font-size:1.25rem; font-weight:800; color:#0B132B;">Nexorian</span>
+      </a>
+      <nav class="header-nav">
+        <div class="nav-actions">
+          <a href="/sign-in" class="btn btn-secondary nav-btn-subtle" style="font-weight:700;">Sign In</a>
+          <a href="/join-organization" class="btn btn-secondary nav-btn-subtle">Join Organization</a>
+          <a href="/create-organization" class="btn btn-primary nav-btn-primary">Create Organization</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Sign In Container -->
+  <main class="signin-main">
+    <div class="signin-card">
+      <div class="signin-header">
+        <span class="signin-badge">Unified Authentication</span>
+        <h1 class="signin-title">Welcome back to Nexorian</h1>
+        <p class="signin-subtitle">Enter your enterprise credentials to access your organization portal.</p>
+      </div>
+
+      <div class="form-alert" id="signin-global-alert" role="alert" aria-live="polite" hidden></div>
+
+      <form class="signin-form" id="signin-form" novalidate>
+        <div class="form-group">
+          <label for="signin-email" class="form-label">
+            <span>Work Email Address</span>
+            <span class="required-indicator" aria-hidden="true">*</span>
+          </label>
+          <div class="input-wrapper">
+            <input type="email" id="signin-email" name="email" class="form-input" placeholder="name@company.com" autocomplete="email" required>
+          </div>
+          <div class="field-error-msg" id="error-email" aria-live="polite"></div>
+        </div>
+
+        <div class="form-group">
+          <div class="label-row" style="display: flex; justify-content: space-between; align-items: center;">
+            <label for="signin-password" class="form-label">
+              <span>Password</span>
+              <span class="required-indicator" aria-hidden="true">*</span>
+            </label>
+          </div>
+          <div class="input-wrapper password-input-wrapper">
+            <input type="password" id="signin-password" name="password" class="form-input" placeholder="������������" autocomplete="current-password" required>
+            <button type="button" class="password-toggle-btn" data-target="signin-password" aria-label="Toggle password visibility">
+              <svg class="eye-icon" viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+          <div class="field-error-msg" id="error-password" aria-live="polite"></div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full signin-submit-btn" id="signin-submit-btn">
+          <span class="btn-text">Sign In</span>
+          <span class="btn-spinner" hidden></span>
+        </button>
+      </form>
+
+      <!-- 1-Click Demo Accounts (Two Portals Only) -->
+      <div style="margin-top: 24px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 16px;">
+        <div style="font-size: 0.75rem; font-weight: 700; color: #0F172A; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+          <span>⚡ Phase 1 Portals (1-Click Test Access)</span>
+        </div>
+        <p style="font-size: 0.75rem; color: #64748B; margin: 0 0 10px;">Select a persona to test its dedicated portal:</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <button type="button" class="btn btn-sm btn-primary btn-demo-login" data-email="founder@nexorian.demo" data-pass="Founder123!" style="font-size: 0.75rem; text-align: left; padding: 8px 10px; justify-content: flex-start; height: auto;">
+            👑 Founder / Owner<br><span style="font-size: 0.6875rem; opacity: 0.85; font-weight: normal;">Owner Portal (/owner-portal)</span>
+          </button>
+          <button type="button" class="btn btn-sm btn-secondary btn-demo-login" data-email="staff@nexorian.corp" data-pass="Staff123!" style="font-size: 0.75rem; text-align: left; padding: 8px 10px; justify-content: flex-start; border-color: #38BDF8; color: #0284C7; height: auto;">
+            🛡️ Staff Verifier<br><span style="font-size: 0.6875rem; opacity: 0.85; font-weight: normal;">Staff Queue (/verifier)</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="signin-bottom-links" style="margin-top: 20px; padding-top: 16px; border-top: 1px solid #F1F5F9; text-align: center; font-size: 0.8125rem; color: #64748B;">
+        <span>Don�t have an organization account?</span>
+        <a href="/create-organization" style="color: #2563EB; font-weight: 600; text-decoration: none; margin-left: 4px;">
+          Create Organization
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/sign-in.js"></script>
+</body>
+</html>

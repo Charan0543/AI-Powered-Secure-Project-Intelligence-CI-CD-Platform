@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Create your organization on Nexorian - Secure, permission-aware project intelligence platform.">
+  <title>Create Organization — Nexorian</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="onboarding-body">
+  <!-- Skip to main content -->
+  <a href="#wizard-main" class="skip-link">Skip to main content</a>
+
+  <!-- Header -->
+  <header class="onboarding-header">
+    <div class="header-container">
+      <a href="/" class="brand-link" aria-label="Nexorian Home">
+        <div class="brand-logo-wrapper" aria-hidden="true">
+          <svg class="brand-logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="32" height="32" rx="8" fill="#0B132B"/>
+            <path d="M16 5L24.5 9.5V16.5C24.5 21.5 20.8 25.8 16 27C11.2 25.8 7.5 21.5 7.5 16.5V9.5L16 5Z" fill="#1D4ED8" stroke="#3B82F6" stroke-width="1.5" stroke-linejoin="round"/>
+            <path d="M13 16L15.2 18.2L19.5 13.8" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="brand-text-block">
+          <span class="brand-name">Nexorian</span>
+          <span class="brand-tagline">Secure. Permission-aware. Project-focused.</span>
+        </div>
+      </a>
+
+      <div class="header-right-nav">
+        <a href="/" class="back-link">
+          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M10 13L5 8L10 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Back to Home
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Onboarding Container -->
+  <main id="wizard-main" class="onboarding-main">
+    <div class="wizard-container">
+      
+      <!-- Step Progress Tracker -->
+      <nav class="step-tracker" aria-label="Registration Progress">
+        <ol class="step-list">
+          <li class="step-item is-active" id="step-tab-1" aria-current="step">
+            <div class="step-indicator">1</div>
+            <span class="step-label">User Account</span>
+          </li>
+          <li class="step-item" id="step-tab-2">
+            <div class="step-indicator">2</div>
+            <span class="step-label">Organization</span>
+          </li>
+          <li class="step-item" id="step-tab-3">
+            <div class="step-indicator">3</div>
+            <span class="step-label">Verification</span>
+          </li>
+        </ol>
+      </nav>
+
+      <!-- Solid Enterprise Card -->
+      <div class="wizard-card">
+        
+        <!-- Global Alert Banner -->
+        <div id="wizard-global-alert" class="form-alert" role="alert" hidden></div>
+
+        <!-- ================================================================
+             STEP 1: User Account Details
+             ================================================================ -->
+        <section id="step-1-pane" class="wizard-step-pane" aria-labelledby="step-1-heading">
+          <div class="pane-header">
+            <span class="pane-eyebrow">STEP 1 OF 3</span>
+            <h1 id="step-1-heading" class="pane-title">User Account Details</h1>
+            <p class="pane-subtitle">Create your personal credentials. As the creator, you will become the initial Organization Owner.</p>
+          </div>
+
+          <form id="step-1-form" class="wizard-form" novalidate>
+            <!-- Full Name -->
+            <div class="form-group" id="group-name">
+              <label for="user-name" class="form-label">
+                Full Name <span class="required-indicator" aria-hidden="true">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="user-name" 
+                name="name" 
+                class="form-input" 
+                placeholder="e.g. Jane Doe" 
+                required 
+                aria-required="true"
+                autocomplete="name"
+                maxlength="100"
+              >
+              <span class="field-error-msg" id="error-name" aria-live="polite"></span>
+            </div>
+
+            <!-- Email Address -->
+            <div class="form-group" id="group-email">
+              <label for="user-email" class="form-label">
+                Email Address <span class="required-indicator" aria-hidden="true">*</span>
+              </label>
+              <input 
+                type="email" 
+                id="user-email" 
+                name="email" 
+                class="form-input" 
+                placeholder="jane@acme.corp" 
+                required 
+                aria-required="true"
+                autocomplete="email"
+                maxlength="150"
+              >
+              <span class="field-hint">A 6-digit verification code will be sent to this email.</span>
+              <span class="field-error-msg" id="error-email" aria-live="polite"></span>
+            </div>
+
+            <!-- Password & Confirm Password Grid -->
+            <div class="form-row-grid">
+              <!-- Password -->
+              <div class="form-group" id="group-password">
+                <label for="user-password" class="form-label">
+                  Create Password <span class="required-indicator" aria-hidden="true">*</span>
+                </label>
+                <div class="password-input-wrapper">
+                  <input 
+                    type="password" 
+                    id="user-password" 
+                    name="password" 
+                    class="form-input password-input" 
+                    placeholder="Min. 8 characters" 
+                    required 
+                    aria-required="true"
+                    autocomplete="new-password"
+                    minlength="8"
+                  >
+                  <button type="button" class="password-toggle-btn" aria-label="Toggle password visibility" data-target="user-password">
+                    <svg class="eye-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path d="M10 4C5 4 1.73 7.11 1 10C1.73 12.89 5 16 10 16C15 16 18.27 12.89 19 10C18.27 7.11 15 4 10 4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                      <circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.6"/>
+                    </svg>
+                  </button>
+                </div>
+                <span class="field-hint">For your personal user account.</span>
+                <span class="field-error-msg" id="error-password" aria-live="polite"></span>
+              </div>
+
+              <!-- Confirm Password -->
+              <div class="form-group" id="group-confirmPassword">
+                <label for="user-confirm-password" class="form-label">
+                  Confirm Password <span class="required-indicator" aria-hidden="true">*</span>
+                </label>
+                <div class="password-input-wrapper">
+                  <input 
+                    type="password" 
+                    id="user-confirm-password" 
+                    name="confirmPassword" 
+                    class="form-input password-input" 
+                    placeholder="Re-enter password" 
+                    required 
+                    aria-required="true"
+                    autocomplete="new-password"
+                  >
+                  <button type="button" class="password-toggle-btn" aria-label="Toggle confirm password visibility" data-target="user-confirm-password">
+                    <svg class="eye-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path d="M10 4C5 4 1.73 7.11 1 10C1.73 12.89 5 16 10 16C15 16 18.27 12.89 19 10C18.27 7.11 15 4 10 4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                      <circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.6"/>
+                    </svg>
+                  </button>
+                </div>
+                <span class="field-error-msg" id="error-confirmPassword" aria-live="polite"></span>
+              </div>
+            </div>
+
+            <!-- Optional Phone & GitHub Grid -->
+            <div class="form-row-grid">
+              <!-- Phone Number -->
+              <div class="form-group" id="group-phoneNumber">
+                <label for="user-phone" class="form-label">
+                  Phone Number <span class="optional-tag">(optional)</span>
+                </label>
+                <input 
+                  type="tel" 
+                  id="user-phone" 
+                  name="phoneNumber" 
+                  class="form-input" 
+                  placeholder="e.g. +1 (555) 019-2834"
+                  autocomplete="tel"
+                  maxlength="30"
+                >
+                <span class="field-error-msg" id="error-phoneNumber" aria-live="polite"></span>
+              </div>
+
+              <!-- GitHub Profile -->
+              <div class="form-group" id="group-githubUrl">
+                <label for="user-github" class="form-label">
+                  GitHub Profile <span class="optional-tag">(optional)</span>
+                </label>
+                <input 
+                  type="text" 
+                  id="user-github" 
+                  name="githubUrl" 
+                  class="form-input" 
+                  placeholder="e.g. https://github.com/janedoe"
+                  autocomplete="url"
+                  maxlength="150"
+                >
+                <span class="field-error-msg" id="error-githubUrl" aria-live="polite"></span>
+              </div>
+            </div>
+
+            <!-- Step 1 Actions -->
+            <div class="wizard-footer">
+              <button type="button" class="btn btn-primary btn-lg" id="goto-step-2-btn">
+                <span>Continue to Organization Details</span>
+                <svg class="btn-arrow-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M3.33337 8H12.6667" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M8 3.33337L12.6667 8.00004L8 12.6667" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <!-- ================================================================
+             STEP 2: Organization Details
+             ================================================================ -->
+        <section id="step-2-pane" class="wizard-step-pane" aria-labelledby="step-2-heading" hidden>
+          <div class="pane-header">
+            <span class="pane-eyebrow">STEP 2 OF 3</span>
+            <h2 id="step-2-heading" class="pane-title">Organization Details</h2>
+            <p class="pane-subtitle">Establish your organization workspace, slug routing, and initial scope.</p>
+          </div>
+
+          <form id="step-2-form" class="wizard-form" novalidate>
+            <!-- Organization Name -->
+            <div class="form-group" id="group-orgName">
+              <label for="org-name" class="form-label">
+                Organization Name <span class="required-indicator" aria-hidden="true">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="org-name" 
+                name="orgName" 
+                class="form-input" 
+                placeholder="e.g. Acme Engineering" 
+                required 
+                aria-required="true"
+                autocomplete="organization"
+                maxlength="100"
+              >
+              <span class="field-error-msg" id="error-orgName" aria-live="polite"></span>
+            </div>
+
+            <!-- Organization Slug -->
+            <div class="form-group" id="group-slug">
+              <div class="label-with-meta">
+                <label for="org-slug" class="form-label">Organization Slug</label>
+                <span class="field-meta-tag">Auto-generated</span>
+              </div>
+              <div class="input-prefix-wrapper">
+                <span class="input-prefix-text" aria-hidden="true">nexorian.internal/</span>
+                <input 
+                  type="text" 
+                  id="org-slug" 
+                  name="slug" 
+                  class="form-input input-with-prefix" 
+                  placeholder="acme-engineering" 
+                  autocomplete="off"
+                  spellcheck="false"
+                  maxlength="60"
+                >
+              </div>
+              <span class="field-hint">Unique identifier for permissions, routing, and context boundaries.</span>
+              <span class="field-error-msg" id="error-slug" aria-live="polite"></span>
+            </div>
+
+            <!-- Type & Country Grid -->
+            <div class="form-row-grid">
+              <!-- Organization Type -->
+              <div class="form-group" id="group-type">
+                <label for="org-type" class="form-label">Organization Type <span class="optional-tag">(optional)</span></label>
+                <select id="org-type" name="type" class="form-select">
+                  <option value="">Select type</option>
+                  <option value="Engineering Team">Engineering Team</option>
+                  <option value="Startup">Startup</option>
+                  <option value="Enterprise">Enterprise</option>
+                  <option value="Open Source">Open Source</option>
+                  <option value="Agency">Agency</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <!-- Location Country -->
+              <div class="form-group" id="group-country">
+                <label for="org-country" class="form-label">Location Country / Region <span class="optional-tag">(optional)</span></label>
+                <input 
+                  type="text" 
+                  id="org-country" 
+                  name="country" 
+                  class="form-input" 
+                  placeholder="e.g. United States" 
+                  maxlength="60"
+                >
+              </div>
+            </div>
+
+            <!-- Address & Org Email/GitHub Grid -->
+            <div class="form-row-grid">
+              <!-- Organization Address -->
+              <div class="form-group" id="group-address">
+                <label for="org-address" class="form-label">Organization Address <span class="optional-tag">(optional)</span></label>
+                <input 
+                  type="text" 
+                  id="org-address" 
+                  name="address" 
+                  class="form-input" 
+                  placeholder="e.g. 100 Market St, Suite 400" 
+                  maxlength="250"
+                >
+              </div>
+
+              <!-- Org Email or GitHub -->
+              <div class="form-group" id="group-orgEmailOrGithub">
+                <label for="org-shared-contact" class="form-label">Org Email or GitHub <span class="optional-tag">(optional)</span></label>
+                <input 
+                  type="text" 
+                  id="org-shared-contact" 
+                  name="orgEmailOrGithub" 
+                  class="form-input" 
+                  placeholder="e.g. https://github.com/acme-org" 
+                  maxlength="150"
+                >
+              </div>
+            </div>
+
+            <!-- Creator Role Info Card -->
+            <div class="role-notice-card">
+              <div class="role-badge-box">
+                <span class="role-badge-owner">OWNER</span>
+              </div>
+              <div class="role-notice-text">
+                <strong>Initial Organization Role: Owner</strong>
+                <p>As the creator, you are assigned the non-delegable Owner role. All permissions remain in pending verification until email confirmation.</p>
+              </div>
+            </div>
+
+            <!-- Step 2 Actions -->
+            <div class="wizard-footer-split">
+              <button type="button" class="btn btn-secondary btn-lg" id="back-to-step-1-btn">
+                <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M12.6666 8H3.33331" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M7.99998 12.6667L3.33331 8.00004L7.99998 3.33337" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Back to User Details</span>
+              </button>
+              <button type="submit" class="btn btn-primary btn-lg" id="submit-registration-btn">
+                <span class="btn-text">Create Organization & Account</span>
+                <span class="btn-spinner" aria-hidden="true" hidden></span>
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <!-- ================================================================
+             STEP 3: Email Verification & Pending Activation
+             ================================================================ -->
+        <section id="step-3-pane" class="wizard-step-pane" aria-labelledby="step-3-heading" hidden>
+          <div class="verification-hub">
+            <div class="verification-icon-box" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="4" width="20" height="16" rx="3" stroke="#2563EB" stroke-width="2"/>
+                <path d="M2 7L12 13L22 7" stroke="#2563EB" stroke-width="2" stroke-linejoin="round"/>
+              </svg>
+            </div>
+
+            <div class="status-pill-pending" role="status">
+              <span class="status-pulse-amber" aria-hidden="true"></span>
+              <span>Verification Pending • Inactive</span>
+            </div>
+
+            <h2 id="step-3-heading" class="pane-title text-center">Organization successfully created</h2>
+            <p class="pane-subtitle text-center">
+              Please verify your email to activate your account and Owner membership. We have sent a 6-digit code to <strong id="display-verify-email">your email</strong>.
+            </p>
+
+            <!-- Development Mode Helper Code Banner -->
+            <div id="dev-code-banner" class="dev-code-helper" hidden>
+              <div class="dev-code-text">
+                <span class="dev-tag">LOCAL DEV CODE</span>
+                <code id="dev-code-value">------</code>
+              </div>
+              <button type="button" class="btn btn-sm btn-secondary" id="autofill-otp-btn">
+                Auto-fill Code
+              </button>
+            </div>
+
+            <!-- OTP Form -->
+            <form id="verify-otp-form" class="otp-form" novalidate>
+              <div class="form-group text-center">
+                <label for="otp-unified-input" class="form-label text-center">Enter 6-Digit Verification Code</label>
+                
+                <!-- Individual 6-digit inputs -->
+                <div class="otp-digits-wrapper" id="otp-boxes-container">
+                  <input type="text" maxlength="1" class="otp-digit" inputmode="numeric" pattern="[0-9]" aria-label="Digit 1" autofocus>
+                  <input type="text" maxlength="1" class="otp-digit" inputmode="numeric" pattern="[0-9]" aria-label="Digit 2">
+                  <input type="text" maxlength="1" class="otp-digit" inputmode="numeric" pattern="[0-9]" aria-label="Digit 3">
+                  <input type="text" maxlength="1" class="otp-digit" inputmode="numeric" pattern="[0-9]" aria-label="Digit 4">
+                  <input type="text" maxlength="1" class="otp-digit" inputmode="numeric" pattern="[0-9]" aria-label="Digit 5">
+                  <input type="text" maxlength="1" class="otp-digit" inputmode="numeric" pattern="[0-9]" aria-label="Digit 6">
+                </div>
+
+                <!-- Hidden input for form submission -->
+                <input type="hidden" id="otp-unified-input" name="code" required>
+                <span class="field-error-msg text-center" id="error-code" aria-live="polite"></span>
+              </div>
+
+              <div class="otp-actions">
+                <button type="submit" class="btn btn-primary btn-lg" id="verify-otp-btn">
+                  <span class="btn-text">Verify Email & Activate Organization</span>
+                  <span class="btn-spinner" aria-hidden="true" hidden></span>
+                </button>
+              </div>
+
+              <div class="resend-row">
+                <span class="resend-text">Didn't receive the code?</span>
+                <button type="button" class="resend-btn" id="resend-otp-btn">
+                  Resend verification code
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             FINAL SUCCESS PANE: Activated
+             ================================================================ -->
+        <section id="step-success-pane" class="wizard-step-pane" aria-labelledby="success-heading" hidden>
+          <div class="success-hub">
+            <div class="success-icon-badge" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" fill="#DCFCE7" stroke="#16A34A" stroke-width="2"/>
+                <path d="M8 12.5L10.5 15L16 9.5" stroke="#16A34A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+
+            <h2 id="success-heading" class="pane-title text-center">Email verified successfully.</h2>
+            <p class="pane-subtitle text-center">
+              <strong>OWNER</strong> membership is now active. Your organization workspace is ready for use.
+            </p>
+
+            <!-- Summary Card -->
+            <div class="activation-summary-card">
+              <div class="summary-item">
+                <span class="summary-label">Organization</span>
+                <span class="summary-value" id="final-org-name">—</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-label">Slug Scope</span>
+                <span class="summary-value summary-slug" id="final-org-slug">—</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-label">Account Owner</span>
+                <span class="summary-value" id="final-owner-email">—</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-label">Membership Status</span>
+                <span class="summary-value badge-active-status">ACTIVE</span>
+              </div>
+            </div>
+
+            <div class="success-actions-block" style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+              <a href="/owner-portal" class="btn btn-primary btn-lg" id="go-to-owner-portal-btn">
+                <span>Enter Owner Portal</span>
+                <svg class="btn-arrow-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M3.33337 8H12.6667" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M8 3.33337L12.6667 8.00004L8 12.6667" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </a>
+              <a href="/workspace" class="btn btn-secondary btn-lg" id="go-to-workspace-btn">
+                <span>Go to Workspace</span>
+              </a>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Script -->
+  <script src="js/create-org.js"></script>
+</body>
+</html>

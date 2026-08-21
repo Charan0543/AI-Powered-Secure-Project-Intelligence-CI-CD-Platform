@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexorian Verifier Dashboard | Staff Operations</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    .queue-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    .queue-table th, .queue-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #334155; font-size: 0.875rem; }
+    .queue-table th { background: #0F172A; color: #94A3B8; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; }
+    .badge-score { display: inline-block; padding: 2px 8px; border-radius: 9999px; font-weight: 700; font-size: 0.75rem; }
+    .score-high { background: #DCFCE7; color: #166534; }
+    .score-mid { background: #FEF9C3; color: #854D0E; }
+    .score-low { background: #FEE2E2; color: #991B1B; }
+  </style>
+</head>
+<body style="background: #0F172A; color: #F8FAFC; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0;">
+  <header style="background: #1E293B; border-bottom: 1px solid #334155; padding: 14px 24px; display: flex; justify-content: space-between; align-items: center;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <a href="/" style="text-decoration:none;"><span style="font-weight: 800; font-size: 1.125rem; color: #38BDF8;">Nexorian Staff Portal</span></a>
+      <span style="background: #0284C7; color: #fff; font-size: 0.6875rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; text-transform: uppercase;">Verifier</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <span id="staff-email-display" style="font-size: 0.8125rem; color: #94A3B8;">staff@nexorian.corp</span>
+      <button id="btn-logout" class="btn btn-sm btn-secondary" style="border-color: #475569; color: #F8FAFC;">Sign Out</button>
+    </div>
+  </header>
+
+  <main style="max-width: 1200px; margin: 32px auto; padding: 0 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px;">
+      <div>
+        <h1 style="font-size: 1.5rem; font-weight: 800; margin: 0 0 6px;">Organization Verification Queue</h1>
+        <p style="font-size: 0.875rem; color: #94A3B8; margin: 0;">Review organization trust signals, evaluate confidence scores, and award trust badges.</p>
+      </div>
+      <div>
+        <select id="status-filter" style="background: #1E293B; border: 1px solid #475569; color: #F8FAFC; padding: 8px 12px; border-radius: 6px; font-size: 0.8125rem;">
+          <option value="">All Requests</option>
+          <option value="NEEDS_MANUAL_REVIEW">Needs Manual Review</option>
+          <option value="SUBMITTED">Submitted</option>
+          <option value="AUTO_APPROVED">Auto-Approved</option>
+          <option value="APPROVED">Approved</option>
+          <option value="REJECTED">Rejected</option>
+          <option value="MORE_INFO_REQUESTED">More Info Requested</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="background: #1E293B; border: 1px solid #334155; border-radius: 10px; overflow: hidden; padding: 20px;">
+      <div id="queue-loading" style="text-align: center; padding: 30px; color: #94A3B8;">Loading queue...</div>
+      <table class="queue-table" id="queue-table" style="display: none;">
+        <thead>
+          <tr>
+            <th>Organization</th>
+            <th>Company Domain</th>
+            <th>Confidence Score</th>
+            <th>Status</th>
+            <th>Submitted</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="queue-tbody"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Unauthenticated Prompt Modal -->
+  <div id="auth-required-modal" style="display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.9); z-index: 2000; align-items: center; justify-content: center; padding: 16px;">
+    <div style="background: #1E293B; border: 1px solid #475569; border-radius: 12px; max-width: 480px; width: 100%; padding: 32px 24px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);">
+      <div style="font-size: 2.25rem; margin-bottom: 12px;">???</div>
+      <h2 style="font-size: 1.25rem; font-weight: 800; color: #38BDF8; margin: 0 0 8px;">Nexorian Staff Access Required</h2>
+      <p style="font-size: 0.875rem; color: #94A3B8; margin: 0 0 20px;">You are not signed in as a Nexorian Verifier Staff account. Sign in or click below:</p>
+      
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <button id="btn-quick-login-staff" class="btn btn-primary" style="height: 40px; font-weight: 600; background: #0284C7;">
+          ?? One-Click Sign In as Staff Verifier
+        </button>
+        <a href="/sign-in?redirect=/verifier" class="btn btn-secondary" style="height: 38px; display: flex; align-items: center; justify-content: center; border-color: #475569; color: #F8FAFC;">
+          Go to Sign In Page
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Review Modal -->
+  <div id="review-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; padding: 16px;">
+    <div style="background: #1E293B; border: 1px solid #475569; border-radius: 12px; max-width: 600px; width: 100%; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);">
+      <h2 id="modal-org-name" style="font-size: 1.25rem; font-weight: 800; margin: 0 0 12px; color: #38BDF8;">Review Organization</h2>
+      <div id="modal-signals-box" style="background: #0F172A; border-radius: 8px; padding: 14px; margin-bottom: 16px; font-size: 0.8125rem;"></div>
+
+      <div style="margin-bottom: 16px;">
+        <label style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 6px; color: #94A3B8;">Review Rationale / Notes</label>
+        <textarea id="review-rationale" style="width: 100%; height: 80px; background: #0F172A; border: 1px solid #475569; border-radius: 6px; color: #F8FAFC; padding: 8px; font-family: inherit; font-size: 0.875rem; box-sizing: border-box;" placeholder="State reasons for decision..."></textarea>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <button id="btn-close-modal" class="btn btn-sm btn-secondary" style="border-color:#475569; color:#94A3B8;">Cancel</button>
+        <div style="display: flex; gap: 8px;">
+          <button id="btn-request-info" class="btn btn-sm btn-secondary" style="background:#854D0E; border:none; color:#fff;">Request Info</button>
+          <button id="btn-reject" class="btn btn-sm btn-secondary" style="background:#991B1B; border:none; color:#fff;">Reject (Suspend)</button>
+          <button id="btn-approve" class="btn btn-sm btn-primary" style="background:#16A34A; border:none;">Approve Trust Badge</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+      let sessionToken = sessionStorage.getItem('nexorian_session_token');
+      let user = null;
+      let currentRequestId = null;
+
+      // 1-Click Quick Login
+      document.getElementById('btn-quick-login-staff').addEventListener('click', async function() {
+        try {
+          const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: 'staff@nexorian.corp', password: 'Staff123!' }),
+          });
+          const data = await res.json();
+          if (res.ok && data.sessionToken) {
+            sessionStorage.setItem('nexorian_session_token', data.sessionToken);
+            sessionStorage.setItem('nexorian_user', JSON.stringify(data.user));
+            window.location.reload();
+          } else {
+            alert('Could not auto-login: ' + (data.error || 'Unknown error'));
+          }
+        } catch(e) {
+          alert('Network error');
+        }
+      });
+
+      // Verify Session with Server
+      if (sessionToken) {
+        try {
+          const res = await fetch('/api/auth/me', {
+            headers: { 'Authorization': 'Bearer ' + sessionToken },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            user = data.user;
+          } else {
+            sessionToken = null;
+          }
+        } catch(e) {
+          sessionToken = null;
+        }
+      }
+
+      if (!sessionToken || !user || !user.isNexorianStaff) {
+        document.getElementById('auth-required-modal').style.display = 'flex';
+        return;
+      }
+
+      document.getElementById('staff-email-display').textContent = user.email;
+
+      document.getElementById('btn-logout').addEventListener('click', async function() {
+        if (sessionToken) {
+          await fetch('/api/auth/logout', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + sessionToken },
+          }).catch(function(){});
+        }
+        sessionStorage.clear();
+        window.location.href = '/sign-in';
+      });
+
+      const tbody = document.getElementById('queue-tbody');
+      const table = document.getElementById('queue-table');
+      const loading = document.getElementById('queue-loading');
+      const filterSelect = document.getElementById('status-filter');
+      const modal = document.getElementById('review-modal');
+
+      async function loadQueue() {
+        loading.style.display = 'block';
+        table.style.display = 'none';
+        const filterVal = filterSelect.value;
+        const url = '/api/verifier/requests' + (filterVal ? '?status=' + filterVal : '');
+
+        try {
+          const res = await fetch(url, {
+            headers: { 'Authorization': 'Bearer ' + sessionToken },
+          });
+
+          if (!res.ok) {
+            loading.textContent = 'Unauthorized or error loading requests.';
+            return;
+          }
+
+          const data = await res.json();
+          tbody.innerHTML = '';
+
+          if (data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#94A3B8; padding:20px;">No verification requests found.</td></tr>';
+          } else {
+            data.forEach(function(req) {
+              const tr = document.createElement('tr');
+              const scoreClass = req.confidenceScore >= 80 ? 'score-high' : (req.confidenceScore >= 50 ? 'score-mid' : 'score-low');
+              const isBadge = req.organization && req.organization.isVerified ? ' ???' : '';
+              const orgName = req.organization ? req.organization.name : 'Unknown';
+              const orgDomain = req.organization ? req.organization.domain : '—';
+
+              tr.innerHTML = '<td style="font-weight:700; color:#F8FAFC;">' + orgName + isBadge + '</td>' +
+                '<td style="color:#94A3B8; font-family:monospace;">' + orgDomain + '</td>' +
+                '<td><span class="badge-score ' + scoreClass + '">' + req.confidenceScore + '%</span></td>' +
+                '<td><span style="font-size:0.75rem; font-weight:700; color:#38BDF8;">' + req.status + '</span></td>' +
+                '<td style="color:#94A3B8; font-size:0.75rem;">' + new Date(req.submittedAt).toLocaleDateString() + '</td>' +
+                '<td><button class="btn btn-sm btn-primary btn-review" data-id="' + req.id + '" data-name="' + orgName + '" style="font-size:0.75rem; padding:4px 10px;">Review</button></td>';
+
+              tr.querySelector('.btn-review').setAttribute('data-signals', req.autoApproveSignals || '[]');
+              tbody.appendChild(tr);
+            });
+          }
+
+          loading.style.display = 'none';
+          table.style.display = 'table';
+        } catch (err) {
+          loading.textContent = 'Failed to fetch verification queue.';
+        }
+      }
+
+      filterSelect.addEventListener('change', loadQueue);
+      loadQueue();
+
+      tbody.addEventListener('click', function(e) {
+        const btn = e.target.closest('.btn-review');
+        if (!btn) return;
+        currentRequestId = btn.getAttribute('data-id');
+        const orgName = btn.getAttribute('data-name');
+        let signals = [];
+        try { signals = JSON.parse(btn.getAttribute('data-signals') || '[]'); } catch(err){}
+
+        document.getElementById('modal-org-name').textContent = 'Review ' + orgName;
+        let signalsHtml = '<div style="font-weight:700; margin-bottom:6px; color:#E2E8F0;">Detected Trust Signals:</div>';
+        if (signals.length === 0) {
+          signalsHtml += '<div style="color:#94A3B8;">No signals detected.</div>';
+        } else {
+          signals.forEach(function(s) {
+            const icon = s.passed ? '?' : '?';
+            signalsHtml += '<div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>' + icon + ' ' + s.signal + '</span><span style="font-weight:700; color:' + (s.passed ? '#4ADE80' : '#F87171') + '">+' + s.weight + '</span></div>';
+          });
+        }
+        document.getElementById('modal-signals-box').innerHTML = signalsHtml;
+        document.getElementById('review-rationale').value = '';
+        modal.style.display = 'flex';
+      });
+
+      document.getElementById('btn-close-modal').addEventListener('click', function() {
+        modal.style.display = 'none';
+      });
+
+      async function submitDecision(decision) {
+        if (!currentRequestId) return;
+        const rationale = document.getElementById('review-rationale').value.trim();
+
+        try {
+          const res = await fetch('/api/verifier/requests/' + currentRequestId + '/decision', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + sessionToken,
+            },
+            body: JSON.stringify({ decision: decision, rationale: rationale }),
+          });
+
+          if (res.ok) {
+            modal.style.display = 'none';
+            loadQueue();
+          } else {
+            const err = await res.json();
+            alert(err.error || 'Failed to submit decision.');
+          }
+        } catch (err) {
+          alert('Network error submitting decision.');
+        }
+      }
+
+      document.getElementById('btn-approve').addEventListener('click', function() { submitDecision('APPROVED'); });
+      document.getElementById('btn-reject').addEventListener('click', function() { submitDecision('REJECTED'); });
+      document.getElementById('btn-request-info').addEventListener('click', function() { submitDecision('MORE_INFO_REQUESTED'); });
+    });
+  </script>
+</body>
+</html>

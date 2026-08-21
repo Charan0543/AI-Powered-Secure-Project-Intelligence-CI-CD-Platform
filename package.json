@@ -1,0 +1,32 @@
+{
+  "name": "nexorian",
+  "version": "0.1.0",
+  "description": "Nexorian — Secure, permission-aware project intelligence platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test --test-concurrency=1 tests/phase1.test.js",
+    "mailpit": "mailpit",
+    "mailpit:install": "winget install axllent.mailpit",
+    "prisma:generate": "prisma generate",
+    "prisma:push": "prisma db push"
+  },
+  "keywords": [
+    "nexorian",
+    "project-intelligence",
+    "permission-aware",
+    "saas"
+  ],
+  "author": "Nexorian Team",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@prisma/client": "^6.4.1",
+    "express": "^4.21.2",
+    "nodemailer": "^9.0.5"
+  },
+  "devDependencies": {
+    "prisma": "^6.4.1",
+    "supertest": "^7.0.0"
+  }
+}

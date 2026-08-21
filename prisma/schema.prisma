@@ -1,0 +1,160 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  FOUNDER
+  ORG_OWNER
+  ADMIN
+  MEMBER
+  CLIENT
+  NEXORIAN_VERIFIER
+}
+
+enum OrgStatus {
+  DRAFT
+  PENDING_VERIFICATION
+  UNDER_REVIEW
+  VERIFIED
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  REMOVED
+}
+
+enum VerificationStatus {
+  SUBMITTED
+  AUTO_APPROVED
+  NEEDS_MANUAL_REVIEW
+  APPROVED
+  REJECTED
+  MORE_INFO_REQUESTED
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+  USED
+}
+
+enum MembershipStatus {
+  ACTIVE
+  PENDING_APPROVAL
+  SUSPENDED
+  REJECTED
+}
+
+model User {
+  id                      String        @id @default(uuid())
+  name                    String
+  email                   String        @unique
+  passwordHash            String
+  isEmailVerified         Boolean       @default(false)
+  isNexorianStaff         Boolean       @default(false)
+  verificationCode        String?
+  verificationCodeExpires DateTime?
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+  memberships             Membership[]
+  sessions                Session[]
+  auditLogs               AuditLog[]
+}
+
+model Organization {
+  id                   String                @id @default(uuid())
+  name                 String
+  slug                 String                @unique
+  companyEmail         String
+  domain               String
+  status               OrgStatus             @default(ACTIVE)
+  isVerified           Boolean               @default(false)
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  memberships          Membership[]
+  invites              Invite[]
+  verificationRequests VerificationRequest[]
+  auditLogs            AuditLog[]
+}
+
+model Membership {
+  id             String           @id @default(uuid())
+  userId         String
+  organizationId String
+  role           Role             @default(MEMBER)
+  status         MembershipStatus @default(ACTIVE)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+}
+
+model Invite {
+  id             String       @id @default(uuid())
+  token          String       @unique
+  email          String
+  role           Role         @default(MEMBER)
+  status         InviteStatus @default(PENDING)
+  expiresAt      DateTime
+  organizationId String
+  invitedById    String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model VerificationRequest {
+  id                 String                 @id @default(uuid())
+  organizationId     String
+  status             VerificationStatus     @default(SUBMITTED)
+  confidenceScore    Int                    @default(0)
+  autoApproveSignals String?                // JSON string of signals
+  reviewNotes        String?
+  submittedAt        DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+  organization       Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  decisions          VerificationDecision[]
+}
+
+model VerificationDecision {
+  id                    String              @id @default(uuid())
+  verificationRequestId String
+  reviewerId            String
+  decision              VerificationStatus
+  rationale             String
+  decidedAt             DateTime            @default(now())
+  verificationRequest   VerificationRequest @relation(fields: [verificationRequestId], references: [id], onDelete: Cascade)
+}
+
+model Session {
+  id          String       @id @default(uuid())
+  token       String       @unique
+  userId      String
+  activeOrgId String?
+  expiresAt   DateTime
+  createdAt   DateTime     @default(now())
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id           String        @id @default(uuid())
+  actorId      String?
+  actorEmail   String?
+  tenantId     String?
+  action       String
+  targetType   String
+  targetId     String?
+  metadata     String?       // JSON string
+  ipAddress    String?
+  timestamp    DateTime      @default(now())
+  user         User?         @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  organization Organization? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
